@@ -20,7 +20,17 @@
 - 接口请求失败会回发一张“请求失败”提示图（包含错误信息与“请联系bot管理员”）。
 - 不再在群里发送 `生成失败：...` 文本。
 
-## 1. 环境要求
+## 1. 运行预览
+
+更新信息示例：
+
+![更新信息预览](docs/images/preview-changelog.png)
+
+房间信息示例：
+
+![房间信息预览](docs/images/preview-room-info.png)
+
+## 2. 环境要求
 
 - Node.js >= 18
 - 可用的 NapCat/OneBot WebSocket 服务
@@ -31,10 +41,14 @@
 npm i ws canvas
 ```
 
-## 2. 目录结构
+## 3. 目录结构
 
 ```text
 .
+├── docs
+│   └── images
+│       ├── preview-changelog.png # README 运行预览图（更新信息）
+│       └── preview-room-info.png # README 运行预览图（房间信息）
 ├── kkbot.js                     # 兼容入口（内部调用 ./src）
 ├── README.md
 └── src
@@ -55,7 +69,7 @@ npm i ws canvas
             └── renderer.js      # 更新日志卡片绘图
 ```
 
-## 3. 环境变量
+## 4. 环境变量
 
 可以复制 `.env.example` 生成 `.env` 后按需配置：
 
@@ -78,11 +92,11 @@ cp .env.example .env
 JSON.parse(sessionStorage.getItem('user-global')).user.token;
 ```
 
-说明：这种 token 通常有效期较短（你的使用经验约 1 天）。
+说明：这种 token 通常有效期较短（一般约 1 天，实际以平台策略为准）。
 
 方式二（小程序网络抓包）：
 1. 对微信 KK 平台小程序抓包获取 token。
-2. 这种 token 有效期通常更长（你的使用经验约 30 天）。
+2. 这种 token 有效期通常更长（一般约 30 天，实际以平台策略为准）。
 
 说明：实际有效期以平台策略为准，建议过期后及时更新。使用时请遵守平台规则与相关法律法规。
 
@@ -120,7 +134,7 @@ KK 相关：
 - `TRIGGER_TEXT`：等同 `ROOM_INFO_TRIGGER_TEXT`
 - `ROOMS_URL`：旧版兼容变量，会自动取 endpoint 基础路径
 
-## 4. 命令用法
+## 5. 命令用法
 
 - `房间信息`
   - 优先使用该群在 `GROUP_DEFAULT_MAP_IDS` 的默认 mapId
@@ -135,13 +149,13 @@ KK 相关：
 - `更新信息 12860` 或 `更新信息 生物星球`
   - 允许临时指定 mapId 或别名后再查更新日志
 
-## 5. 启动
+## 6. 启动
 
 ```bash
 npm start
 ```
 
-## 6. 常见维护点
+## 7. 常见维护点
 
 ### 改默认群号
 修改 `src/config/index.js` 里的 `DEFAULT_GROUP_IDS`。
@@ -161,7 +175,7 @@ npm start
 ### 改消息路由/频控
 修改 `src/bot/napcat-group-bot.js`。
 
-## 7. 发布到 GitHub 前
+## 8. 发布到 GitHub 前
 
 - 不要提交 `.env`（已在 `.gitignore` 忽略）。
 - 不要提交 `logs/`、`node_modules/`、`.npm-cache/`（已忽略）。
@@ -181,7 +195,7 @@ git remote add origin <你的仓库地址>
 git push -u origin main
 ```
 
-## 8. 说明
+## 9. 说明
 
 - `kkbot.js` 作为兼容入口保留，便于继续沿用原启动命令。
 - 生产环境建议使用进程守护工具（如 pm2/systemd）运行。
