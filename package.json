@@ -1,7 +1,7 @@
 {
   "name": "kkbot",
   "version": "1.0.0",
-  "description": "NapCat/OneBot bot for KK room info and changelog cards",
+  "description": "KK对战平台群聊机器人（基于 OneBot WebSocket）",
   "main": "kkbot.js",
   "private": true,
   "scripts": {

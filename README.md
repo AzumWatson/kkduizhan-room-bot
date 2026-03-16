@@ -1,4 +1,4 @@
-# KK 群机器人（NapCat + OneBot + Canvas）
+# KK对战平台 群聊机器人（NapCat + OneBot + Canvas）
 
 按功能分层的 Node.js 项目结构：
 - `config`：环境变量与校验
@@ -6,6 +6,12 @@
 - `bot`：NapCat WS 连接与消息路由
 - `features`：房间信息、更新信息的业务与绘图
 - `app`：应用装配与启动
+
+## 前置条件（必须先完成）
+
+- 必须先部署 NapCat（推荐）或其他支持 OneBot WebSocket 的服务。
+- 若未提供 OneBot WebSocket 服务，本项目将无法接收群消息，也无法回发图片。
+- 请先确认机器人账号在线，并且已加入目标 QQ 群。
 
 ## 0. 项目用途
 
