@@ -2,6 +2,7 @@
   "name": "kkbot",
   "version": "1.0.0",
   "description": "KK对战平台群聊机器人（基于 OneBot WebSocket）",
+  "license": "MIT",
   "main": "kkbot.js",
   "private": true,
   "scripts": {

@@ -205,3 +205,7 @@ git push -u origin main
 
 - `kkbot.js` 作为兼容入口保留，便于继续沿用原启动命令。
 - 生产环境建议使用进程守护工具（如 pm2/systemd）运行。
+
+## 10. 开源协议
+
+本项目采用 MIT License，详见 [LICENSE](LICENSE)。
