@@ -90,39 +90,6 @@ function parseGroupIds(raw) {
     return ids.length ? new Set(ids) : null;
 }
 
-function normalizeAliasKey(text) {
-    return String(text || "")
-        .trim()
-        .toLowerCase();
-}
-
-function parseMapAliases(raw) {
-    const aliasMap = new Map();
-    const text = (raw || "").trim();
-    if (!text) return aliasMap;
-
-    const items = text
-        .split(";")
-        .map((x) => x.trim())
-        .filter(Boolean);
-
-    for (const item of items) {
-        const idx = item.indexOf(",");
-        if (idx <= 0 || idx >= item.length - 1) continue;
-
-        const mapId = Number(item.slice(0, idx).trim());
-        const alias = item.slice(idx + 1).trim();
-        if (!Number.isFinite(mapId) || mapId <= 0 || !alias) continue;
-
-        aliasMap.set(normalizeAliasKey(alias), {
-            mapId: Math.floor(mapId),
-            alias,
-        });
-    }
-
-    return aliasMap;
-}
-
 function parseGroupDefaultMapIds(raw) {
     const out = new Map();
     const text = (raw || "").trim();
@@ -192,7 +159,6 @@ function loadConfig(env = process.env) {
             mapListLimit: parsePositiveInt(runtimeEnv.KK_MAP_LIST_LIMIT, 32),
             roomNameListLimit: parsePositiveInt(runtimeEnv.KK_ROOM_NAME_LIST_LIMIT, 12),
             changelogLimit: parsePositiveInt(runtimeEnv.KK_CHANGELOG_LIMIT, 1),
-            aliases: parseMapAliases(runtimeEnv.MAP_ALIASES || ""),
         },
         render: {
             width: parsePositiveInt(runtimeEnv.CANVAS_WIDTH, 974),

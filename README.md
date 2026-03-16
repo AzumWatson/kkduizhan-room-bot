@@ -121,7 +121,6 @@ KK 相关：
 - `KK_CHANGELOGS_ENDPOINT`：更新日志接口地址
 - `KK_DEFAULT_MAP_ID`：全局默认 mapId
 - `GROUP_DEFAULT_MAP_IDS`：分群默认 mapId，格式 `群号:mapId;群号:mapId`
-- `MAP_ALIASES`：地图别名，格式 `mapId,别名;mapId,别名`
 - `KK_MAP_LIST_LIMIT`：按 mapId 查询房间时的 limit（默认 `32`）
 - `KK_ROOM_NAME_LIST_LIMIT`：按 roomName 查询房间时的 limit（默认 `12`）
 - `KK_CHANGELOG_LIMIT`：更新日志查询条数（默认 `1`）
@@ -152,8 +151,8 @@ KK 相关：
 
 - `更新信息`
   - 按当前群默认 mapId 查询最新更新日志
-- `更新信息 12860` 或 `更新信息 生物星球`
-  - 允许临时指定 mapId 或别名后再查更新日志
+- `更新信息 xxx`
+  - 参数会被忽略，仍只按当前群默认 mapId 查询
 
 ## 6. 启动
 

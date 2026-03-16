@@ -1,45 +1,11 @@
 const { fetchMapChangelog } = require("../../integrations/kk-api");
 const { resolveDefaultMapIdForGroup } = require("../room-info/service");
 
-function normalizeAliasKey(text) {
-    return String(text || "")
-        .trim()
-        .toLowerCase();
-}
-
-function resolveMapIdForChangelog(queryText, kkConfig, groupId) {
-    const keyword = String(queryText || "").trim();
-    if (!keyword) {
-        return {
-            mapId: resolveDefaultMapIdForGroup(kkConfig, groupId),
-            mapLabel: "",
-            note: "",
-        };
-    }
-
-    if (/^[1-9]\d*$/.test(keyword)) {
-        const mapId = Number(keyword);
-        return {
-            mapId,
-            mapLabel: `mapId:${mapId}`,
-            note: "",
-        };
-    }
-
-    const aliasHit = kkConfig.aliases.get(normalizeAliasKey(keyword));
-    if (aliasHit) {
-        return {
-            mapId: aliasHit.mapId,
-            mapLabel: aliasHit.alias,
-            note: "",
-        };
-    }
-
-    const fallbackMapId = resolveDefaultMapIdForGroup(kkConfig, groupId);
+function resolveMapIdForChangelog(_queryText, kkConfig, groupId) {
     return {
-        mapId: fallbackMapId,
-        mapLabel: `mapId:${fallbackMapId}`,
-        note: `参数未命中别名，已使用默认 mapId（${fallbackMapId}）`,
+        mapId: resolveDefaultMapIdForGroup(kkConfig, groupId),
+        mapLabel: "",
+        note: "",
     };
 }
 
@@ -116,7 +82,7 @@ async function fetchChangelogCardModel({ groupId, queryText, kkConfig }) {
 
     if (!first) {
         return {
-            titleLeft: target.mapLabel || `mapId:${target.mapId}`,
+            titleLeft: `mapId:${target.mapId}`,
             titleRight: "",
             lines: [],
             note: target.note,
@@ -127,7 +93,7 @@ async function fetchChangelogCardModel({ groupId, queryText, kkConfig }) {
     const lines = htmlToLines(first.content);
 
     return {
-        titleLeft: first.mapVersion || target.mapLabel || `mapId:${target.mapId}`,
+        titleLeft: first.mapVersion || `mapId:${target.mapId}`,
         titleRight: first.createTime || "",
         lines,
         note: target.note,
