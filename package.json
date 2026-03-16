@@ -1,0 +1,18 @@
+{
+  "name": "kkbot",
+  "version": "1.0.0",
+  "description": "NapCat/OneBot bot for KK room info and changelog cards",
+  "main": "kkbot.js",
+  "private": true,
+  "scripts": {
+    "start": "node kkbot.js",
+    "check": "node --check kkbot.js && node --check src/index.js && node --check src/app.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "canvas": "^3.2.1",
+    "ws": "^8.19.0"
+  }
+}
