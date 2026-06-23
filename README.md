@@ -18,8 +18,9 @@
 这个项目主要用于让群友在 QQ 群里直接查看 KK 平台地图房间信息和地图更新信息。  
 不用每次都开电脑进入平台页面，也能快速知道当前有哪些房间、是否开局、最近更新了什么内容。
 
-支持两条群命令：
+支持这些群命令：
 - `房间信息`：查询房间列表（空参数走默认 mapId；有参数全部按房间名搜索）
+- `房间信息80`：查询 80dz 房间列表（需要配置 80dz 账号密码）
 - `更新信息`：查询地图最新更新日志（对应当前群 mapId）
 
 错误处理：
@@ -88,6 +89,9 @@ cp .env.example .env
 必填：
 - `KK_TOKEN`
 
+可选启用：
+- `DZ80_USERNAME` 和 `DZ80_PASSWORD`：同时配置后启用 `房间信息80` 查询。只配置其中一个不会启用 80dz 功能。
+
 ### KK_TOKEN 获取方式
 
 方式一（网页控制台）：
@@ -125,6 +129,22 @@ KK 相关：
 - `KK_ROOM_NAME_LIST_LIMIT`：按 roomName 查询房间时的 limit（默认 `12`）
 - `KK_CHANGELOG_LIMIT`：更新日志查询条数（默认 `1`）
 
+80dz 相关：
+- `ROOM_INFO_80_TRIGGER_TEXT`：80dz 房间查询触发词，默认 `房间信息80`
+- `DZ80_USERNAME`：80dz 登录账号/手机号
+- `DZ80_PASSWORD`：80dz 登录密码
+- `DZ80_SESSION_CACHE_FILE`：sid 缓存文件，默认 `./logs/80dz-session.json`
+- `DZ80_ROOMS_ENDPOINT`：80dz 房间接口，默认 `https://sala.80dzgame.com/hall/getTeamPageInfo`
+- `DZ80_LOGIN_ENDPOINT`：80dz 登录接口，默认 `https://apionline.80dzgame.com/user/pwdLogin`
+- `DZ80_CLIENT_VERSION`：80dz 客户端版本，默认 `1.9.9.50`
+- `DZ80_CHANNEL`：80dz 渠道，默认 `biying`
+- `DZ80_COUNTRY_CODE`：国家区号，默认 `86`
+- `DZ80_ROOM_LIST_SIZE`：80dz 每次查询数量，默认 `12`
+
+80dz 兼容项：
+- `WAR3_USERNAME`、`WAR3_PASSWORD`、`WAR3_SID` 可作为 fallback；新配置建议统一使用 `DZ80_*`。
+- sid 缓存文件只保存 `sid/token/uid/user_info/savedAt`，不会保存明文密码。
+
 渲染相关：
 - `MAX_ROWS`：房间表格最多展示行数，默认 `18`
 - `CANVAS_WIDTH`：房间表格画布宽度，默认 `974`
@@ -149,10 +169,38 @@ KK 相关：
 - `房间信息 12860`
   - 也按 `roomName=12860` 搜索（不会再按 mapId 查询）
 
+- `房间信息80`
+  - 查询 80dz 默认房间列表（`room_name=""`）
+- `房间信息80 生物星球`
+  - 查询 80dz，直接把 `生物星球` 作为 `room_name`
+
 - `更新信息`
   - 按当前群默认 mapId 查询最新更新日志
 - `更新信息 xxx`
   - 参数会被忽略，仍只按当前群默认 mapId 查询
+
+### 80dz 自动登录与 sid 缓存
+
+启用 80dz 后，机器人会优先使用内存中的 sid；进程刚启动且内存为空时，会读取 `DZ80_SESSION_CACHE_FILE`。如果房间接口返回 `code:0`，说明 sid 有效，会继续复用。
+
+如果房间接口返回：
+
+```json
+{"code":6,"data":{"total":0}}
+```
+
+说明 sid 已过期。机器人会自动用 `DZ80_USERNAME` / `DZ80_PASSWORD` 调用登录接口获取新的 `hs_token`，把它作为新的 sid 缓存到本地，然后重试本次房间查询一次。重试仍失败时，会回发错误图片。
+
+80dz 房间图字段映射：
+
+| 图片列 | 80dz 字段 | 说明 |
+|---|---|---|
+| 房间号 | `room_code` | 直接显示 |
+| 房间名称 | `name` | 有密码时名称后显示锁 |
+| 地图名称 | `map_name` | 自动清理 Warcraft 颜色码 |
+| 密码 | `room_password` | 空字符串显示 `-` |
+| 房间人数 | `players` | 例如 `1/6` |
+| 状态 | `status` | `0` 显示 `等待中`，`1` 显示 `已开始` |
 
 ## 6. 启动
 

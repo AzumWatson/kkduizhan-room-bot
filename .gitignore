@@ -9,6 +9,7 @@ node_modules/
 # Runtime artifacts
 logs/
 *.log
+80dz-session.json
 
 # Local npm cache / debug
 .npm-cache/

@@ -28,6 +28,40 @@ function roundRect(ctx, x, y, w, h, r) {
     ctx.closePath();
 }
 
+function getTableLayout(model, tableW) {
+    if (model && model.layout === "dz80") {
+        return {
+            col: {
+                roomNo: { x: 16, w: 98 },
+                roomName: { x: 126, w: 236 },
+                mode: { x: 374, w: 240 },
+                level: { x: 626, w: 82 },
+                people: { x: 720, w: 88 },
+                status: { x: 820, w: tableW - 820 - 16 },
+            },
+            labels: {
+                mode: "地图名称",
+                level: "密码",
+            },
+        };
+    }
+
+    return {
+        col: {
+            roomNo: { x: 16, w: 98 },
+            roomName: { x: 126, w: 330 },
+            mode: { x: 448, w: 124 },
+            level: { x: 584, w: 90 },
+            people: { x: 686, w: 86 },
+            status: { x: 786, w: tableW - 786 - 16 },
+        },
+        labels: {
+            mode: "模式",
+            level: "地图等级",
+        },
+    };
+}
+
 function renderRoomTableToBase64Png(model, { width = 974 } = {}) {
     const W = width;
     const PAD = 18;
@@ -72,15 +106,7 @@ function renderRoomTableToBase64Png(model, { width = 974 } = {}) {
     const tableX = cardX;
     const tableY = cardY + titleH;
     const tableW = cardW;
-
-    const col = {
-        roomNo: { x: 16, w: 98 },
-        roomName: { x: 126, w: 330 },
-        mode: { x: 448, w: 124 },
-        level: { x: 584, w: 90 },
-        people: { x: 686, w: 86 },
-        status: { x: 786, w: tableW - 786 - 16 },
-    };
+    const { col, labels } = getTableLayout(model, tableW);
 
     ctx.font = "14px sans-serif";
     ctx.fillStyle = "rgba(255,255,255,0.65)";
@@ -89,8 +115,8 @@ function renderRoomTableToBase64Png(model, { width = 974 } = {}) {
 
     ctx.fillText("房间号", tableX + col.roomNo.x, headerY);
     ctx.fillText("房间名称", tableX + col.roomName.x, headerY);
-    ctx.fillText("模式", tableX + col.mode.x, headerY);
-    ctx.fillText("地图等级", tableX + col.level.x, headerY);
+    ctx.fillText(labels.mode, tableX + col.mode.x, headerY);
+    ctx.fillText(labels.level, tableX + col.level.x, headerY);
 
     const peopleCenterX = tableX + col.people.x + col.people.w / 2;
     ctx.textAlign = "center";

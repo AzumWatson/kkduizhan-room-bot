@@ -1,14 +1,17 @@
 const { loadConfig, validateConfig } = require("./config");
 const { setupLogger } = require("./core/logger");
 const { NapCatGroupBot } = require("./bot/napcat-group-bot");
+const { createDz80ApiClient } = require("./integrations/dz80-api");
 const { fetchRoomInfoTableModel } = require("./features/room-info/service");
+const { fetchDz80RoomInfoTableModel } = require("./features/room-info/dz80-service");
 const { renderRoomTableToBase64Png } = require("./features/room-info/renderer");
 const { fetchChangelogCardModel } = require("./features/changelog/service");
 const { renderChangelogToBase64Png } = require("./features/changelog/renderer");
 const { renderErrorToBase64Png } = require("./features/common/error-image");
 
 function createHandlers(config) {
-    return {
+    const dz80Client = config.dz80 && config.dz80.enabled ? createDz80ApiClient(config.dz80) : null;
+    const handlers = {
         roomInfo: async ({ groupId, queryText, bot }) => {
             const model = await fetchRoomInfoTableModel({
                 groupId,
@@ -38,6 +41,24 @@ function createHandlers(config) {
             bot.sendGroupImageBase64(groupId, imageBase64);
         },
     };
+
+    if (dz80Client) {
+        handlers.roomInfo80 = async ({ groupId, queryText, bot }) => {
+            const model = await fetchDz80RoomInfoTableModel({
+                queryText,
+                dz80Client,
+                maxRows: config.render.maxRows,
+            });
+
+            const imageBase64 = renderRoomTableToBase64Png(model, {
+                width: config.render.width,
+            });
+
+            bot.sendGroupImageBase64(groupId, imageBase64);
+        };
+    }
+
+    return handlers;
 }
 
 function createErrorHandler(config) {
@@ -63,9 +84,10 @@ function start() {
 
     console.log(`[BOOT] started_at=${new Date().toISOString()}`);
     console.log(`[BOOT] groups=${[...config.bot.targetGroups].join(",")}`);
-    console.log(
-        `[BOOT] commands=roomInfo:${config.bot.commands.roomInfo.triggerText},changelog:${config.bot.commands.changelog.triggerText}`
-    );
+    const commands = Object.entries(config.bot.commands)
+        .map(([key, command]) => `${key}:${command.triggerText}`)
+        .join(",");
+    console.log(`[BOOT] commands=${commands}`);
 
     const bot = new NapCatGroupBot(config, createHandlers(config), {
         onError: createErrorHandler(config),

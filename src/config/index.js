@@ -7,6 +7,9 @@ const DEFAULT_KK_ROOMS_ENDPOINT =
     "https://kk-web-gateway.kkdzpt.com/platform-map-api/api/v3/map/w3_roomList";
 const DEFAULT_KK_CHANGELOG_ENDPOINT =
     "https://kk-web-gateway.kkdzpt.com/platform-map-api/api/v3/map/changelogs";
+const DEFAULT_DZ80_ROOMS_ENDPOINT = "https://sala.80dzgame.com/hall/getTeamPageInfo";
+const DEFAULT_DZ80_LOGIN_ENDPOINT = "https://apionline.80dzgame.com/user/pwdLogin";
+const DEFAULT_DZ80_SESSION_CACHE_FILE = "./logs/80dz-session.json";
 
 function parseDotEnvValue(rawValue) {
     const value = String(rawValue == null ? "" : rawValue).trim();
@@ -124,6 +127,25 @@ function loadConfig(env = process.env) {
 
     const roomInfoTriggerText = (runtimeEnv.ROOM_INFO_TRIGGER_TEXT || runtimeEnv.TRIGGER_TEXT || "房间信息").trim();
     const changelogTriggerText = (runtimeEnv.CHANGELOG_TRIGGER_TEXT || "更新信息").trim();
+    const roomInfo80TriggerText = (runtimeEnv.ROOM_INFO_80_TRIGGER_TEXT || "房间信息80").trim();
+    const dz80Username = (runtimeEnv.DZ80_USERNAME || runtimeEnv.WAR3_USERNAME || "").trim();
+    const dz80Password = runtimeEnv.DZ80_PASSWORD || runtimeEnv.WAR3_PASSWORD || "";
+    const dz80Enabled = Boolean(dz80Username && dz80Password);
+
+    const commands = {
+        roomInfo: {
+            triggerText: roomInfoTriggerText,
+        },
+        changelog: {
+            triggerText: changelogTriggerText,
+        },
+    };
+
+    if (dz80Enabled) {
+        commands.roomInfo80 = {
+            triggerText: roomInfo80TriggerText,
+        };
+    }
 
     return {
         ws: {
@@ -134,14 +156,7 @@ function loadConfig(env = process.env) {
         bot: {
             cooldownMs: parsePositiveInt(runtimeEnv.COOLDOWN_MS, 5000),
             targetGroups: parseGroupIds(runtimeEnv.GROUP_IDS) || new Set(DEFAULT_GROUP_IDS),
-            commands: {
-                roomInfo: {
-                    triggerText: roomInfoTriggerText,
-                },
-                changelog: {
-                    triggerText: changelogTriggerText,
-                },
-            },
+            commands,
         },
         kk: {
             roomsEndpoint: normalizeEndpoint(
@@ -159,6 +174,31 @@ function loadConfig(env = process.env) {
             mapListLimit: parsePositiveInt(runtimeEnv.KK_MAP_LIST_LIMIT, 32),
             roomNameListLimit: parsePositiveInt(runtimeEnv.KK_ROOM_NAME_LIST_LIMIT, 12),
             changelogLimit: parsePositiveInt(runtimeEnv.KK_CHANGELOG_LIMIT, 1),
+        },
+        dz80: {
+            enabled: dz80Enabled,
+            triggerText: roomInfo80TriggerText,
+            username: dz80Username,
+            password: dz80Password,
+            sid: (runtimeEnv.DZ80_SID || runtimeEnv.WAR3_SID || "").trim(),
+            token: (runtimeEnv.DZ80_TOKEN || runtimeEnv.WAR3_TOKEN || "").trim(),
+            uid: (runtimeEnv.DZ80_UID || runtimeEnv.WAR3_UID || "").trim(),
+            sessionCacheFile: path.resolve(
+                (runtimeEnv.DZ80_SESSION_CACHE_FILE || DEFAULT_DZ80_SESSION_CACHE_FILE).trim()
+            ),
+            roomsEndpoint: normalizeEndpoint(
+                runtimeEnv.DZ80_ROOMS_ENDPOINT || DEFAULT_DZ80_ROOMS_ENDPOINT,
+                DEFAULT_DZ80_ROOMS_ENDPOINT
+            ),
+            loginEndpoint: normalizeEndpoint(
+                runtimeEnv.DZ80_LOGIN_ENDPOINT || DEFAULT_DZ80_LOGIN_ENDPOINT,
+                DEFAULT_DZ80_LOGIN_ENDPOINT
+            ),
+            clientVersion: (runtimeEnv.DZ80_CLIENT_VERSION || runtimeEnv.WAR3_CLIENT_VERSION || "1.9.9.50").trim(),
+            channel: (runtimeEnv.DZ80_CHANNEL || runtimeEnv.WAR3_CHANNEL || "biying").trim(),
+            countryCode: String(runtimeEnv.DZ80_COUNTRY_CODE || runtimeEnv.WAR3_COUNTRY_CODE || "86").replace(/^\+/, ""),
+            roomListSize: parsePositiveInt(runtimeEnv.DZ80_ROOM_LIST_SIZE, 12),
+            fetchTimeoutMs: parsePositiveInt(runtimeEnv.FETCH_TIMEOUT_MS, 10000),
         },
         render: {
             width: parsePositiveInt(runtimeEnv.CANVAS_WIDTH, 974),
@@ -197,6 +237,14 @@ function validateConfig(config) {
         throw new Error("CHANGELOG_TRIGGER_TEXT 不能为空。");
     }
 
+    const roomInfo80Trigger = config.bot.commands && config.bot.commands.roomInfo80
+        ? String(config.bot.commands.roomInfo80.triggerText || "").trim()
+        : "";
+
+    if (config.dz80 && config.dz80.enabled && !roomInfo80Trigger) {
+        throw new Error("ROOM_INFO_80_TRIGGER_TEXT 不能为空。");
+    }
+
     if (!config.kk.roomsEndpoint) {
         throw new Error("KK_ROOMS_ENDPOINT 不能为空。");
     }
@@ -207,6 +255,15 @@ function validateConfig(config) {
 
     if (!config.kk.defaultMapId) {
         throw new Error("KK_DEFAULT_MAP_ID 不能为空。");
+    }
+
+    if (config.dz80 && config.dz80.enabled) {
+        if (!config.dz80.roomsEndpoint) {
+            throw new Error("DZ80_ROOMS_ENDPOINT 不能为空。");
+        }
+        if (!config.dz80.loginEndpoint) {
+            throw new Error("DZ80_LOGIN_ENDPOINT 不能为空。");
+        }
     }
 }
 
