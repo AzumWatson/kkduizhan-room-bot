@@ -29,7 +29,7 @@ function toDz80TableModel(
     const code = apiJson && apiJson.code;
     const data = apiJson && apiJson.data ? apiJson.data : {};
     const teams = Array.isArray(data.teams) ? data.teams : [];
-    const title = "房间信息";
+    const title = "80对战房间信息";
     const keyword = String(queryText || "").trim();
 
     if (code !== 0) {
